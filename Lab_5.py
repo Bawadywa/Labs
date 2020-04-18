@@ -7,6 +7,7 @@ import scipy.stats
 x_min = [-6, -8, -10]
 x_max = [10, 3, 9]
 
+
 x_0 = [(x_min[i] + x_max[i])/2 for i in range(len(x_min))]
 x_delta = [x_max[i] - x_0[i] for i in range(len(x_max))]
 
@@ -21,6 +22,8 @@ N_lineal = 4
 N_interaction = 8
 N_squares = 15
 l = 1.215
+
+list_coefficients = []
 
 cohren_values = {1: 9065, 2: 7679, 3: 6841, 4: 6287, 5: 5892, 6: 5598, 7: 5365, 8: 5175, 9: 5017,
                  10: 4884, range(11, 17): 4366, range(17, 37): 3720, range(37, 145): 3093}
@@ -548,7 +551,7 @@ class Calc:
         self.out_student()
 
     def check_fisher(self):
-        self.d = self.N - self.list_coefficients.count(0)
+        self.d = len(self.list_coefficients) - self.list_coefficients.count(0)
         if self.N - self.d == 0:
             self.out_fisher(False)
         else:
@@ -573,8 +576,6 @@ class Calc:
                 print(self.string_main2.format(str(row + 1), *self.matrix_out[row]))
         print(self.string_y_average1.format(*self.average_y_caption))
         print(self.string_y_average2.format(*list(map(round, self.average_y))))
-        if self.m == 4 and self.N==15:
-            quit(print("END"))
 
     def out_regression_caption(self, flag):
         if self.N == 4:
@@ -676,7 +677,10 @@ class Calc:
                     print(self.list_t[index], "<", self.Stud_criterion,
                           "|b" + self.list_of_indexes[count_index] + " - незначимий з ймовірністю " + str(self.p))
                 count_index += 1
-
+        if self.N == 15:
+            for elem in self.list_coefficients:
+                if elem != 0:
+                    list_coefficients.append(elem)
         self.out_regression_student()
 
     def out_regression_student(self):
@@ -747,19 +751,25 @@ class Calc:
 
 choice = int(input("If you want to check only squares, input 0\n"
                    "If you want to see the whole algorithm, input 1 : "))
+
 if choice:
-    while True:
-        calc_lineal = Calc(matrix_x_code_1, M, N_lineal)
-        if not calc_lineal.check_adequacy:
-            calc_interaction = Calc(matrix_x_code_2, M, N_interaction)
-            calc_interaction.initial_calculation(calc_lineal.matrix_y)
-            if not calc_interaction.check_adequacy:
-                calc_squares = Calc(matrix_x_code_3, M, N_squares)
-                calc_squares.initial_calculation(calc_interaction.matrix_y)
-                if calc_squares.check_adequacy:
-                    break
-        else:
-            break
+    for i in range(100):
+        while True:
+            calc_lineal = Calc(matrix_x_code_1, M, N_lineal)
+            if not calc_lineal.check_adequacy:
+                calc_interaction = Calc(matrix_x_code_2, M, N_interaction)
+                calc_interaction.initial_calculation(calc_lineal.matrix_y)
+                if not calc_interaction.check_adequacy:
+                    calc_squares = Calc(matrix_x_code_3, M, N_squares)
+                    calc_squares.initial_calculation(calc_interaction.matrix_y)
+                    if calc_squares.check_adequacy:
+                        break
+            else:
+                break
+    if list_coefficients:
+        print("Середнє значення усіх значимих коефіцієнтів: ", sum(list_coefficients) / len(list_coefficients))
 else:
-    calc_squares = Calc(matrix_x_code_3, M, N_squares)
-    calc_squares.initial_calculation()
+    for i in range(100):
+        calc_squares = Calc(matrix_x_code_3, M, N_squares)
+        calc_squares.initial_calculation()
+    print("Середнє значення усіх значимих коефіцієнтів: ", sum(list_coefficients)/len(list_coefficients))
